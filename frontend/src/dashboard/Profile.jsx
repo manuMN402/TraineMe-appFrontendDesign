@@ -17,6 +17,7 @@ export default function Profile({ navigation, route }) {
   const [lastName, setLastName] = useState(userData.lastName || "");
   const [email, setEmail] = useState(userData.email || "");
   const [phone, setPhone] = useState(userData.phone || "");
+  const userId = userData.userId || "N/A";
 
   const handleSave = () => {
     Alert.alert("Success", "Profile updated successfully!");
@@ -108,6 +109,36 @@ export default function Profile({ navigation, route }) {
             marginBottom: 16,
           }}
         >
+          {/* User ID */}
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 12, color: "#999", marginBottom: 8 }}>
+              User ID
+            </Text>
+            <View
+              style={{
+                backgroundColor: "#0f1419",
+                borderWidth: 1,
+                borderColor: "#6366f1",
+                borderRadius: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#6366f1",
+                  fontWeight: "600",
+                  fontFamily: "monospace",
+                  letterSpacing: 0.5,
+                }}
+              >
+                {userId}
+              </Text>
+            </View>
+          </View>
+
           {/* First Name */}
           <View style={{ marginBottom: 16 }}>
             <Text style={{ fontSize: 12, color: "#999", marginBottom: 8 }}>
