@@ -13,7 +13,12 @@ export default function RoleSelectScreen({ navigation }) {
         <View style={styles.logoCircle}>
           <Image 
             source={require("../../assets/images/logo.png")}
-            style={{ width: 80, height: 80, resizeMode: "contain" }}
+            style={{ 
+              width: 80, 
+              height: 80, 
+              borderRadius: 40,
+              resizeMode: "contain" 
+            }}
           />
         </View>
 
