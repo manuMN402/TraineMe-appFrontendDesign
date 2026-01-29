@@ -102,3 +102,4 @@ export default function Bookings({ navigation }) {
     </SafeAreaView>
   );
 }
+//shade
