@@ -77,6 +77,12 @@ export default function RegisterScreen({ route, navigation }) {
     if (!isFormValid) {
       console.log("Form not valid", { firstName, lastName, email, phone, password, errors });
       Alert.alert("Form Error", "Please fill all fields correctly and fix any errors.");
+      setLoading(false);
+      return;
+    }
+
+    if (loading) {
+      console.log("Already registering, ignoring duplicate click");
       return;
     }
 
@@ -90,24 +96,27 @@ export default function RegisterScreen({ route, navigation }) {
       console.log("Email exists check:", userExists);
       
       if (userExists) {
+        setLoading(false);
         // Get the user ID for this email
         const existingUser = await getUserByEmail(email);
         const userIdText = existingUser ? `\n\nYour User ID: ${existingUser.userId}` : "";
         
-        Alert.alert(
-          "Email Already Exists",
-          `This email is already registered. Please login instead.${userIdText}`,
-          [
-            { text: "Cancel", onPress: () => setLoading(false) },
-            {
-              text: "Go to Login",
-              onPress: () => {
-                setLoading(false);
-                navigation.navigate("Login");
+        // Use setTimeout to ensure Alert is shown after loading is set to false
+        setTimeout(() => {
+          Alert.alert(
+            "Email Already Exists",
+            `This email is already registered. Please login instead.${userIdText}`,
+            [
+              { text: "Cancel", onPress: () => {} },
+              {
+                text: "Go to Login",
+                onPress: () => {
+                  navigation.navigate("Login");
+                },
               },
-            },
-          ]
-        );
+            ]
+          );
+        }, 100);
         return;
       }
 
