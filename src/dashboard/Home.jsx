@@ -14,10 +14,10 @@ import TrainerCard from "../components/TrainerCard";
 
 const CATEGORIES = ["All", "Fitness", "Coding", "Yoga"];
 
-export default function UserHome({ navigation, route }) {
+export default function Home({ navigation, route }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Get user data from route params
   const userData = route?.params?.userData || {};
   const firstName = userData.firstName || "User";
@@ -34,19 +34,27 @@ export default function UserHome({ navigation, route }) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#070B1A" }}>
-      {/* Header with Back Button */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12 }}>
+      {/* Header */}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+        }}
+      >
         <Text style={{ fontSize: 20, fontWeight: "700", color: "white" }}>
           {firstName} {lastName}
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{ 
-            padding: 8, 
-            backgroundColor: "#1a1d2e", 
+          style={{
+            padding: 8,
+            backgroundColor: "#1a1d2e",
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: "#333"
+            borderColor: "#333",
           }}
         >
           <Ionicons name="arrow-back" size={20} color="#8b5cf6" />
@@ -119,7 +127,14 @@ export default function UserHome({ navigation, route }) {
         </ScrollView>
 
         {/* Top Trainers Title */}
-        <Text style={{ fontSize: 18, fontWeight: "700", color: "white", marginBottom: 12 }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "700",
+            color: "white",
+            marginBottom: 12,
+          }}
+        >
           Top Trainers
         </Text>
       </View>
@@ -139,59 +154,6 @@ export default function UserHome({ navigation, route }) {
         scrollEnabled={true}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
-
-      {/* Bottom Navigation */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-around",
-          alignItems: "center",
-          backgroundColor: "#0f1419",
-          paddingVertical: 12,
-          borderTopWidth: 1,
-          borderTopColor: "#2a2f3f",
-        }}
-      >
-        <TouchableOpacity
-          style={{ alignItems: "center", padding: 8 }}
-          onPress={() => navigation.navigate("UserHome")}
-        >
-          <Ionicons name="home" size={24} color="#8b5cf6" />
-          <Text style={{ color: "#8b5cf6", fontSize: 11, marginTop: 4, fontWeight: "600" }}>
-            Home
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{ alignItems: "center", padding: 8 }}
-          onPress={() => navigation.navigate("BookingHistory")}
-        >
-          <Ionicons name="calendar" size={24} color="#666" />
-          <Text style={{ color: "#666", fontSize: 11, marginTop: 4, fontWeight: "600" }}>
-            Bookings
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{ alignItems: "center", padding: 8 }}
-          onPress={() => navigation.navigate("UserMessages")}
-        >
-          <Ionicons name="chatbubble" size={24} color="#666" />
-          <Text style={{ color: "#666", fontSize: 11, marginTop: 4, fontWeight: "600" }}>
-            Messages
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{ alignItems: "center", padding: 8 }}
-          onPress={() => navigation.navigate("UserProfile", { userData })}
-        >
-          <Ionicons name="person" size={24} color="#666" />
-          <Text style={{ color: "#666", fontSize: 11, marginTop: 4, fontWeight: "600" }}>
-            Profile
-          </Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
