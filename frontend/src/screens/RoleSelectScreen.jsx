@@ -53,7 +53,7 @@ export default function RoleSelectScreen({ navigation }) {
           onPress={() => navigation.navigate("Register", { role: "Trainer" })}
         >
           <View style={styles.iconCircle}>
-            <Ionicons name="school-outline" size={24} color={Colors.primary} />
+            <Ionicons name="people" size={24} color={Colors.primary} />
           </View>
 
           <View>
