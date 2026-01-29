@@ -14,9 +14,9 @@ export default function RoleSelectScreen({ navigation }) {
           <Image 
             source={require("../../assets/images/logo.png")}
             style={{ 
-              width: 80, 
-              height: 80, 
-              borderRadius: 40,
+              width: 120, 
+              height: 120, 
+              borderRadius: 60,
               resizeMode: "contain" 
             }}
           />

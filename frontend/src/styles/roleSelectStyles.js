@@ -17,13 +17,20 @@ export const roleSelectStyles = StyleSheet.create({
   },
 
   logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.primary,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "#070B1A",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
+    borderWidth: 8,
+    borderColor: "#6366f1",
+    shadowColor: "#6366f1",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
+    elevation: 10,
   },
 
   title: {
