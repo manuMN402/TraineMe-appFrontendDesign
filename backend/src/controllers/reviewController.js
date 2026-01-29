@@ -1,7 +1,7 @@
-const prisma = require('../config/database');
+import prisma from '../config/database.js';
 
 // Create review
-const createReview = async (req, res, next) => {
+export const createReview = async (req, res, next) => {
   try {
     const { bookingId, rating, comment } = req.body;
 
@@ -70,7 +70,7 @@ const createReview = async (req, res, next) => {
 };
 
 // Get trainer reviews
-const getTrainerReviews = async (req, res, next) => {
+export const getTrainerReviews = async (req, res, next) => {
   try {
     const { trainerId } = req.params;
     const { page = 1, limit = 10 } = req.query;
@@ -112,7 +112,7 @@ const getTrainerReviews = async (req, res, next) => {
 };
 
 // Update review
-const updateReview = async (req, res, next) => {
+export const updateReview = async (req, res, next) => {
   try {
     const { reviewId } = req.params;
     const { rating, comment } = req.body;
@@ -150,7 +150,7 @@ const updateReview = async (req, res, next) => {
 };
 
 // Delete review
-const deleteReview = async (req, res, next) => {
+export const deleteReview = async (req, res, next) => {
   try {
     const { reviewId } = req.params;
 
@@ -179,7 +179,7 @@ const deleteReview = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createReview,
   getTrainerReviews,
   updateReview,

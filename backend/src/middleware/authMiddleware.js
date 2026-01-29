@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-const authMiddleware = (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
 
@@ -16,18 +16,16 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-const isTrainer = (req, res, next) => {
+export const isTrainer = (req, res, next) => {
   if (req.user.role !== 'TRAINER') {
     return res.status(403).json({ error: 'Only trainers can access this route' });
   }
   next();
 };
 
-const isUser = (req, res, next) => {
+export const isUser = (req, res, next) => {
   if (req.user.role !== 'USER') {
     return res.status(403).json({ error: 'Only users can access this route' });
   }
   next();
 };
-
-module.exports = { authMiddleware, isTrainer, isUser };

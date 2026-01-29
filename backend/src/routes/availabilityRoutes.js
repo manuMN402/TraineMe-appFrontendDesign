@@ -1,10 +1,6 @@
-const express = require('express');
-const {
-  addAvailability,
-  getAvailabilities,
-  deleteAvailability,
-} = require('../controllers/availabilityController');
-const { authMiddleware, isTrainer } = require('../middleware/authMiddleware');
+import express from 'express';
+import { addAvailability, getAvailabilities, deleteAvailability } from '../controllers/availabilityController.js';
+import { authMiddleware, isTrainer } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -12,4 +8,4 @@ router.post('/', authMiddleware, isTrainer, addAvailability);
 router.get('/:trainerId', getAvailabilities);
 router.delete('/:availabilityId', authMiddleware, isTrainer, deleteAvailability);
 
-module.exports = router;
+export default router;

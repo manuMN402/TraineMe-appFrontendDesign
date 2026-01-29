@@ -1,8 +1,8 @@
-const prisma = require('../config/database');
-const { hashPassword, comparePassword, generateToken } = require('../utils/auth');
+import prisma from '../config/database.js';
+import { hashPassword, comparePassword, generateToken } from '../utils/auth.js';
 
 // Register user or trainer
-const register = async (req, res, next) => {
+export const register = async (req, res, next) => {
   try {
     const { email, password, firstName, lastName, phone, role } = req.body;
 
@@ -54,7 +54,7 @@ const register = async (req, res, next) => {
 };
 
 // Login user
-const login = async (req, res, next) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -99,7 +99,7 @@ const login = async (req, res, next) => {
 };
 
 // Get current user
-const getProfile = async (req, res, next) => {
+export const getProfile = async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -132,7 +132,7 @@ const getProfile = async (req, res, next) => {
 };
 
 // Update user profile
-const updateProfile = async (req, res, next) => {
+export const updateProfile = async (req, res, next) => {
   try {
     const { firstName, lastName, phone, profileImage } = req.body;
 
@@ -166,9 +166,82 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  register,
-  login,
-  getProfile,
-  updateProfile,
+// Get user by ID (public safe view)
+export const getUserById = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { trainerProfile: true },
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      profileImage: user.profileImage,
+      role: user.role,
+      trainerProfile: user.trainerProfile,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update user by ID (owner only)
+export const updateUserById = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    if (req.user.id !== userId) return res.status(403).json({ error: 'Forbidden' });
+
+    const { firstName, lastName, phone, profileImage, password } = req.body;
+
+    const data = {
+      firstName: firstName || undefined,
+      lastName: lastName || undefined,
+      phone: phone || undefined,
+      profileImage: profileImage || undefined,
+    };
+
+    if (password) {
+      data.password = await hashPassword(password);
+    }
+
+    const user = await prisma.user.update({ where: { id: userId }, data });
+
+    res.json({ message: 'User updated', user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete user by ID (owner only)
+export const deleteUserById = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    if (req.user.id !== userId) return res.status(403).json({ error: 'Forbidden' });
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    res.json({ message: 'User deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get all users (authenticated)
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, profileImage: true },
+    });
+
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
 };

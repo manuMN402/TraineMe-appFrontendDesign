@@ -1,6 +1,7 @@
 {
   "name": "traineme-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "TraineMe App Backend - Trainer Booking Platform",
   "main": "src/server.js",
   "scripts": {

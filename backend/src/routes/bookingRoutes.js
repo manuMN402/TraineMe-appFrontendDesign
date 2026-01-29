@@ -1,12 +1,6 @@
-const express = require('express');
-const {
-  createBooking,
-  getUserBookings,
-  getTrainerBookings,
-  updateBookingStatus,
-  cancelBooking,
-} = require('../controllers/bookingController');
-const { authMiddleware, isUser, isTrainer } = require('../middleware/authMiddleware');
+import express from 'express';
+import { createBooking, getUserBookings, getTrainerBookings, updateBookingStatus, cancelBooking } from '../controllers/bookingController.js';
+import { authMiddleware, isUser, isTrainer } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -16,4 +10,4 @@ router.get('/trainer/requests', authMiddleware, isTrainer, getTrainerBookings);
 router.put('/:bookingId/status', authMiddleware, isTrainer, updateBookingStatus);
 router.put('/:bookingId/cancel', authMiddleware, cancelBooking);
 
-module.exports = router;
+export default router;

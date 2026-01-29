@@ -1,7 +1,7 @@
-const prisma = require('../config/database');
+import prisma from '../config/database.js';
 
 // Create trainer profile
-const createTrainerProfile = async (req, res, next) => {
+export const createTrainerProfile = async (req, res, next) => {
   try {
     const { bio, specialty, experience, certification, hourlyRate, profileImage, bannerImage } = req.body;
 
@@ -37,7 +37,7 @@ const createTrainerProfile = async (req, res, next) => {
 };
 
 // Get trainer profile
-const getTrainerProfile = async (req, res, next) => {
+export const getTrainerProfile = async (req, res, next) => {
   try {
     const { trainerId } = req.params;
 
@@ -68,7 +68,7 @@ const getTrainerProfile = async (req, res, next) => {
 };
 
 // Update trainer profile
-const updateTrainerProfile = async (req, res, next) => {
+export const updateTrainerProfile = async (req, res, next) => {
   try {
     const { bio, specialty, experience, certification, hourlyRate, profileImage, bannerImage } = req.body;
 
@@ -102,8 +102,22 @@ const updateTrainerProfile = async (req, res, next) => {
   }
 };
 
+// Delete trainer profile (owner)
+export const deleteTrainerProfile = async (req, res, next) => {
+  try {
+    const trainerProfile = await prisma.trainerProfile.findUnique({ where: { userId: req.user.id } });
+    if (!trainerProfile) return res.status(404).json({ error: 'Trainer profile not found' });
+
+    await prisma.trainerProfile.delete({ where: { id: trainerProfile.id } });
+
+    res.json({ message: 'Trainer profile deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get all trainers (with search and filter)
-const getAllTrainers = async (req, res, next) => {
+export const getAllTrainers = async (req, res, next) => {
   try {
     const { specialty, minPrice, maxPrice, rating, page = 1, limit = 10 } = req.query;
 
@@ -156,11 +170,4 @@ const getAllTrainers = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-module.exports = {
-  createTrainerProfile,
-  getTrainerProfile,
-  updateTrainerProfile,
-  getAllTrainers,
 };

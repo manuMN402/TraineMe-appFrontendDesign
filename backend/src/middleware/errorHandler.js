@@ -1,4 +1,4 @@
-const errorHandler = (err, req, res, next) => {
+export default function errorHandler(err, req, res, next) {
   console.error(err.stack);
 
   // Prisma unique constraint error
@@ -20,6 +20,4 @@ const errorHandler = (err, req, res, next) => {
   res.status(err.status || 500).json({
     error: err.message || 'Internal Server Error',
   });
-};
-
-module.exports = errorHandler;
+} 

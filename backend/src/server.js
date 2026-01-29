@@ -1,15 +1,15 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const config = require('./config/env');
-const errorHandler = require('./middleware/errorHandler');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import config from './config/env.js';
+import errorHandler from './middleware/errorHandler.js';
 
 // Import routes
-const authRoutes = require('./routes/authRoutes');
-const trainerRoutes = require('./routes/trainerRoutes');
-const availabilityRoutes = require('./routes/availabilityRoutes');
-const bookingRoutes = require('./routes/bookingRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
+import authRoutes from './routes/authRoutes.js';
+import trainerRoutes from './routes/trainerRoutes.js';
+import availabilityRoutes from './routes/availabilityRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const app = express();
 
@@ -66,4 +66,4 @@ app.listen(PORT, () => {
   console.log(`📝 Environment: ${config.nodeEnv}`);
 });
 
-module.exports = app;
+export default app;

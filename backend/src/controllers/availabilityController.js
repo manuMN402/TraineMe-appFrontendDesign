@@ -1,7 +1,7 @@
-const prisma = require('../config/database');
+import prisma from '../config/database.js';
 
 // Add availability
-const addAvailability = async (req, res, next) => {
+export const addAvailability = async (req, res, next) => {
   try {
     const { day, startTime, endTime } = req.body;
 
@@ -47,7 +47,7 @@ const addAvailability = async (req, res, next) => {
 };
 
 // Get trainer availabilities
-const getAvailabilities = async (req, res, next) => {
+export const getAvailabilities = async (req, res, next) => {
   try {
     const { trainerId } = req.params;
 
@@ -63,7 +63,7 @@ const getAvailabilities = async (req, res, next) => {
 };
 
 // Delete availability
-const deleteAvailability = async (req, res, next) => {
+export const deleteAvailability = async (req, res, next) => {
   try {
     const { availabilityId } = req.params;
 
@@ -90,10 +90,4 @@ const deleteAvailability = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-module.exports = {
-  addAvailability,
-  getAvailabilities,
-  deleteAvailability,
-};
+}; 

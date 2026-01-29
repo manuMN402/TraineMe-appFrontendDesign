@@ -1,7 +1,7 @@
-const prisma = require('../config/database');
+import prisma from '../config/database.js';
 
 // Create booking
-const createBooking = async (req, res, next) => {
+export const createBooking = async (req, res, next) => {
   try {
     const { trainerId, sessionDate, startTime, endTime, notes } = req.body;
 
@@ -60,7 +60,7 @@ const createBooking = async (req, res, next) => {
 };
 
 // Get user bookings
-const getUserBookings = async (req, res, next) => {
+export const getUserBookings = async (req, res, next) => {
   try {
     const { status, page = 1, limit = 10 } = req.query;
 
@@ -108,7 +108,7 @@ const getUserBookings = async (req, res, next) => {
 };
 
 // Get trainer bookings
-const getTrainerBookings = async (req, res, next) => {
+export const getTrainerBookings = async (req, res, next) => {
   try {
     const { status, page = 1, limit = 10 } = req.query;
 
@@ -161,7 +161,7 @@ const getTrainerBookings = async (req, res, next) => {
 };
 
 // Update booking status (for trainers)
-const updateBookingStatus = async (req, res, next) => {
+export const updateBookingStatus = async (req, res, next) => {
   try {
     const { bookingId } = req.params;
     const { status } = req.body;
@@ -205,7 +205,7 @@ const updateBookingStatus = async (req, res, next) => {
 };
 
 // Cancel booking
-const cancelBooking = async (req, res, next) => {
+export const cancelBooking = async (req, res, next) => {
   try {
     const { bookingId } = req.params;
 
@@ -235,7 +235,7 @@ const cancelBooking = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createBooking,
   getUserBookings,
   getTrainerBookings,

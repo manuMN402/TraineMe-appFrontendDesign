@@ -1,6 +1,6 @@
-require('dotenv').config();
+import 'dotenv/config';
 
-module.exports = {
+const config = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   jwtSecret: process.env.JWT_SECRET,
@@ -8,3 +8,5 @@ module.exports = {
   corsOrigin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
   databaseUrl: process.env.DATABASE_URL,
 };
+
+export default config;
