@@ -6,12 +6,14 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import RegisterStyles from "../styles/registerStyles";
 import { Colors } from "../constants/colors";
+import { findUser } from "../utils/userStorage";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -25,8 +27,11 @@ export default function LoginScreen({ navigation }) {
     let error = "";
 
     if (field === "email" && value) {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        error = "Enter a valid email";
+      // Allow both email and user ID format
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      const isUserId = /^TRAINEME-[A-Z0-9]{8}$/.test(value);
+      if (!isEmail && !isUserId) {
+        error = "Enter a valid email or User ID (TRAINEME-XXXXXXXX)";
       }
     }
 
@@ -49,19 +54,27 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      // TODO: Connect to backend API for authentication
-      // For now, simulate login success
-      setTimeout(() => {
-        navigation.navigate("UserDashboard", {
-          userData: {
-            email,
-            password,
-          },
+      // Find user by email or user ID with password validation
+      const user = await findUser(email, password);
+      
+      if (user) {
+        // Login successful
+        const nextScreen = user.role === "Trainer" ? "TrainerHome" : "UserDashboard";
+        navigation.navigate(nextScreen, {
+          userData: user,
+          role: user.role,
         });
-        setLoading(false);
-      }, 1000);
+      } else {
+        // User not found or password incorrect
+        Alert.alert(
+          "Login Failed",
+          "Invalid User ID/Email or password. Please check and try again or register if you're new."
+        );
+      }
     } catch (error) {
-      setErrors({ general: "Login failed. Please try again." });
+      Alert.alert("Error", "An error occurred during login. Please try again.");
+      console.error("Login error:", error);
+    } finally {
       setLoading(false);
     }
   };

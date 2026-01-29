@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
@@ -14,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import RegisterStyles from "../styles/registerStyles";
 import { Colors } from "../constants/colors";
 import { generateUniqueUserId } from "../utils/idGenerator";
+import { emailExists, saveUser } from "../utils/userStorage";
 
 export default function RegisterScreen({ route, navigation }) {
   const role = route?.params?.role || "User";
@@ -27,6 +29,7 @@ export default function RegisterScreen({ route, navigation }) {
   const [errors, setErrors] = useState({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [userId, setUserId] = useState("");
+  const [loading, setLoading] = useState(false);
 
   /* 🔍 LIVE VALIDATION */
   const validate = (field, value) => {
@@ -70,11 +73,62 @@ export default function RegisterScreen({ route, navigation }) {
     password &&
     Object.values(errors).every((e) => e === "");
 
-  const handleRegister = () => {
-    // Generate unique user ID
-    const generatedUserId = generateUniqueUserId();
-    setUserId(generatedUserId);
-    setShowSuccessModal(true);
+  const handleRegister = async () => {
+    if (!isFormValid) return;
+
+    setLoading(true);
+
+    try {
+      // Check if email already exists
+      const userExists = await emailExists(email);
+      
+      if (userExists) {
+        Alert.alert(
+          "Email Already Exists",
+          "This email is already registered. Please login instead.",
+          [
+            { text: "Cancel", onPress: () => setLoading(false) },
+            {
+              text: "Go to Login",
+              onPress: () => {
+                setLoading(false);
+                navigation.navigate("Login");
+              },
+            },
+          ]
+        );
+        return;
+      }
+
+      // Generate unique user ID
+      const generatedUserId = generateUniqueUserId();
+      setUserId(generatedUserId);
+
+      // Save user data to local storage
+      const userData = {
+        userId: generatedUserId,
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+        role,
+        createdAt: new Date().toISOString(),
+      };
+
+      const saved = await saveUser(userData);
+      
+      if (saved) {
+        setShowSuccessModal(true);
+      } else {
+        Alert.alert("Error", "Failed to create account. Please try again.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "An error occurred. Please try again.");
+      console.error("Registration error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleContinueAfterSuccess = () => {
