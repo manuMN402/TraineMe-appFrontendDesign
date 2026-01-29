@@ -1,17 +1,11 @@
 /**
  * Generate a unique user ID
- * Format: TRAINEME-XXXXXXXX (8 random alphanumeric characters)
+ * Format: USER-XXXXXX (6 random numeric digits)
  */
 export const generateUniqueUserId = () => {
-  const prefix = "TRAINEME";
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let randomPart = "";
-
-  for (let i = 0; i < 8; i++) {
-    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  return `${prefix}-${randomPart}`;
+  const prefix = "USER";
+  const randomNum = String(Math.floor(100000 + Math.random() * 900000));
+  return `${prefix}-${randomNum}`;
 };
 
 /**

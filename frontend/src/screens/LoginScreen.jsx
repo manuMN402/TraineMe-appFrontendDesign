@@ -29,9 +29,9 @@ export default function LoginScreen({ navigation }) {
     if (field === "email" && value) {
       // Allow both email and user ID format
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      const isUserId = /^TRAINEME-[A-Z0-9]{8}$/.test(value);
+      const isUserId = /^USER-[0-9]{6}$/.test(value);
       if (!isEmail && !isUserId) {
-        error = "Enter a valid email or User ID (TRAINEME-XXXXXXXX)";
+        error = "Enter a valid email or User ID (USER-XXXXXX)";
       }
     }
 
