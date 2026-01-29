@@ -28,6 +28,7 @@ export default function Bookings({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#070B1A" }}>
       {/* Header with Back Button */}
+      
       <View
         style={{
           flexDirection: "row",
@@ -102,4 +103,4 @@ export default function Bookings({ navigation }) {
     </SafeAreaView>
   );
 }
-//shade
+//vjhxzutz
