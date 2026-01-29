@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
 import { roleSelectStyles as styles } from "../styles/roleSelectStyles";
@@ -11,7 +11,10 @@ export default function RoleSelectScreen({ navigation }) {
 
         {/* LOGO */}
         <View style={styles.logoCircle}>
-          <Ionicons name="fitness-outline" size={36} color="#fff" />
+          <Image 
+            source={require("../../assets/images/logo.png")}
+            style={{ width: 80, height: 80, resizeMode: "contain" }}
+          />
         </View>
 
         {/* TITLE */}

@@ -95,7 +95,7 @@ export default function RegisterScreen({ route, navigation }) {
         }}
       >
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="white" />
+          <Ionicons name="arrow-back" size={15} color="whitesmoke" />
         </TouchableOpacity>
       </View>
 

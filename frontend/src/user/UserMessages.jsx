@@ -52,13 +52,9 @@ export default function UserMessages({ navigation }) {
           onPress={() => navigation.goBack()}
           style={{
             padding: 8,
-            backgroundColor: "#1a1d2e",
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: "#333",
           }}
         >
-          <Ionicons name="arrow-back" size={20} color="#8b5cf6" />
+          <Ionicons name="arrow-back" size={15} color="whitesmoke" />
         </TouchableOpacity>
       </View>
 
