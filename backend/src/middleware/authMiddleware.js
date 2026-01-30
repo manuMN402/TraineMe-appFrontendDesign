@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import prisma from '../config/database.js';
 
 export const authMiddleware = (req, res, next) => {
   try {
@@ -8,7 +9,8 @@ export const authMiddleware = (req, res, next) => {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || 'your-secret-key';
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     next();
   } catch (error) {
@@ -16,16 +18,22 @@ export const authMiddleware = (req, res, next) => {
   }
 };
 
-export const isTrainer = (req, res, next) => {
-  if (!req.user || String(req.user.role).toLowerCase() !== 'trainer') {
-    return res.status(403).json({ error: 'Only trainers can access this route' });
+export const isTrainer = async (req, res, next) => {
+  try {
+    const trainerProfile = await prisma.trainerProfile.findUnique({
+      where: { userId: req.user.id },
+    });
+    if (!trainerProfile) {
+      return res.status(403).json({ error: 'User is not a trainer' });
+    }
+    req.trainerProfile = trainerProfile;
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Authorization failed' });
   }
-  next();
 };
 
-export const isUser = (req, res, next) => {
-  if (!req.user || String(req.user.role).toLowerCase() !== 'user') {
-    return res.status(403).json({ error: 'Only users can access this route' });
-  }
+export const isUser = async (req, res, next) => {
+  // Any authenticated user is considered a user
   next();
 };

@@ -165,14 +165,13 @@ export default function RegisterScreen({ route, navigation }) {
     try {
       console.log('Starting registration with role:', role);
 
-      // Call API register
+      // Call API register (do not send role - it's determined by trainer profile creation)
       const response = await register({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
         phone: formData.phone,
         password: formData.password,
-        role: role,
       });
 
       if (response && response.user) {
@@ -185,36 +184,56 @@ export default function RegisterScreen({ route, navigation }) {
             {
               text: 'OK',
               onPress: () => {
-                // Navigate to appropriate dashboard based on role
-                const navigationTarget =
-                  role === 'TRAINER' ? 'TrainerTabs' : 'UserTabs';
-
-                navigation.reset({
-                  index: 0,
-                  routes: [
-                    {
-                      name: navigationTarget,
-                      params: {
-                        userData: response.user,
-                        role: role,
+                // For trainers, navigate to trainer setup or tabs
+                // For users, navigate to user tabs
+                if (role === 'TRAINER') {
+                  navigation.reset({
+                    index: 0,
+                    routes: [
+                      {
+                        name: 'TrainerRegister',
+                        params: {
+                          userData: response.user,
+                        },
                       },
-                    },
-                  ],
-                });
+                    ],
+                  });
+                } else {
+                  navigation.reset({
+                    index: 0,
+                    routes: [
+                      {
+                        name: 'UserTabs',
+                        params: {
+                          userData: response.user,
+                        },
+                      },
+                    ],
+                  });
+                }
               },
             },
           ]
         );
+      } else {
+        throw new Error('Invalid registration response');
       }
     } catch (error) {
       console.error('Registration error:', error);
 
       let errorMessage =
+        error.message ||
         'An error occurred during registration. Please try again.';
-      if (error.message.includes('already registered')) {
+      if (
+        error.message &&
+        error.message.includes('already registered')
+      ) {
         errorMessage =
           'This email is already registered. Please try logging in or use a different email.';
-      } else if (error.message.includes('validation')) {
+      } else if (
+        error.message &&
+        error.message.includes('validation')
+      ) {
         errorMessage =
           'Please check your input and ensure all fields are filled correctly.';
       }

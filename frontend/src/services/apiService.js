@@ -3,7 +3,7 @@
  * Centralized API calls for all backend endpoints
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = 'http://192.168.0.228:3000/api';
 
 // Helper function to handle requests
 const apiCall = async (endpoint, method = 'GET', body = null, token = null) => {

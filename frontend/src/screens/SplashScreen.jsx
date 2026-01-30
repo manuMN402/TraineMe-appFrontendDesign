@@ -22,19 +22,19 @@ export default function SplashScreen({ navigation }) {
         toValue: 1,
         duration: 1200,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(opacityAnim, {
         toValue: 1,
         duration: 1200,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(slideAnim, {
         toValue: 1,
         duration: 1400,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -135,13 +135,13 @@ function DotLoader() {
             toValue: 1,
             duration: 400,
             easing: Easing.inOut(Easing.quad),
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
           Animated.timing(null, {
             toValue: 0,
             duration: 400,
             easing: Easing.inOut(Easing.quad),
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
         ])
       );
@@ -154,13 +154,13 @@ function DotLoader() {
           toValue: 1,
           duration: 400,
           easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(dot1Anim, {
           toValue: 0,
           duration: 400,
           easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ])
     ).start();
@@ -172,13 +172,13 @@ function DotLoader() {
           toValue: 1,
           duration: 400,
           easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(dot2Anim, {
           toValue: 0,
           duration: 400,
           easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ])
     ).start();
@@ -190,13 +190,13 @@ function DotLoader() {
           toValue: 1,
           duration: 400,
           easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(dot3Anim, {
           toValue: 0,
           duration: 400,
           easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ])
     ).start();
