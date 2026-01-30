@@ -7,95 +7,221 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import RegisterStyles from "../styles/registerStyles";
+import { authStyles as styles } from "../styles/authStyles";
 import { Colors } from "../constants/colors";
 import { findUser } from "../utils/userStorage";
 
+// ==================== CONSTANTS ====================
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USER_ID_REGEX = /^USER-[0-9]{6}$/;
+const PASSWORD_MIN_LENGTH = 6;
+
+// ==================== LOGIN SCREEN COMPONENT ====================
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  // Form state
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  // UI state
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  /* 🔍 LIVE VALIDATION */
-  const validate = (field, value) => {
-    let error = "";
+  // ==================== VALIDATION LOGIC ====================
 
-    if (field === "email" && value) {
-      // Allow both email and user ID format
-      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      const isUserId = /^USER-[0-9]{6}$/.test(value);
-      if (!isEmail && !isUserId) {
-        error = "Enter a valid email or User ID (USER-XXXXXX)";
-      }
+  /**
+   * Real-time email validation
+   * Accepts both email format and User ID format (USER-XXXXXX)
+   */
+  const validateEmail = useCallback((value) => {
+    if (!value.trim()) {
+      return "Email or User ID is required";
     }
 
-    if (field === "password" && value) {
-      if (value.length < 6) {
-        error = "Password must be at least 6 characters";
-      }
+    const isEmail = EMAIL_REGEX.test(value);
+    const isUserId = USER_ID_REGEX.test(value);
+
+    if (!isEmail && !isUserId) {
+      return "Enter a valid email or User ID (USER-XXXXXX)";
     }
 
-    setErrors((prev) => ({ ...prev, [field]: error }));
-  };
+    return "";
+  }, []);
 
-  const isFormValid =
-    email &&
-    password &&
-    Object.values(errors).every((e) => e === "");
+  /**
+   * Real-time password validation
+   */
+  const validatePassword = useCallback((value) => {
+    if (!value) {
+      return "Password is required";
+    }
 
-  const handleLogin = async () => {
-    if (!isFormValid) return;
+    if (value.length < PASSWORD_MIN_LENGTH) {
+      return `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
+    }
 
-    setLoading(true);
-    try {
-      // Find user by email or user ID with password validation
-      const user = await findUser(email, password);
-      
-      if (user) {
-        // Login successful
-        const nextScreen = user.role === "Trainer" ? "TrainerHome" : "UserDashboard";
-        navigation.navigate(nextScreen, {
-          userData: user,
-          role: user.role,
+    return "";
+  }, []);
+
+  /**
+   * Handle field changes with real-time validation
+   */
+  const handleFieldChange = useCallback(
+    (fieldName, value) => {
+      setFormData((prev) => ({ ...prev, [fieldName]: value }));
+
+      // Real-time validation
+      let fieldError = "";
+      if (fieldName === "email") {
+        fieldError = validateEmail(value);
+      } else if (fieldName === "password") {
+        fieldError = validatePassword(value);
+      }
+
+      setErrors((prev) => ({ ...prev, [fieldName]: fieldError }));
+    },
+    [validateEmail, validatePassword]
+  );
+
+  /**
+   * Check if form is valid
+   */
+  const isFormValid = useCallback(() => {
+    return (
+      formData.email.trim().length > 0 &&
+      formData.password.length > 0 &&
+      !errors.email &&
+      !errors.password
+    );
+  }, [formData, errors]);
+
+  /**
+   * Handle back navigation safely
+   */
+  const handleBack = useCallback(() => {
+    if (navigation?.canGoBack?.()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate("RoleSelect");
+    }
+  }, [navigation]);
+
+  /**
+   * Handle navigation based on user role
+   */
+  const navigateByRole = useCallback(
+    (user) => {
+      try {
+        const role = user?.role || "User";
+        const navigationTarget = role === "Trainer" ? "TrainerTabs" : "UserTabs";
+
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: navigationTarget,
+              params: {
+                userData: user,
+                role: role,
+              },
+            },
+          ],
         });
+      } catch (error) {
+        console.error("Navigation error:", error);
+        Alert.alert("Navigation Error", "Could not navigate to dashboard. Please try again.");
+      }
+    },
+    [navigation]
+  );
+
+  /**
+   * Main login handler
+   */
+  const handleLogin = useCallback(async () => {
+    if (!isFormValid()) {
+      Alert.alert("Validation Error", "Please check all fields and fix errors.");
+      return;
+    }
+
+    if (loading) return; // Prevent duplicate submissions
+    setLoading(true);
+
+    try {
+      const user = await findUser(formData.email, formData.password);
+
+      if (user) {
+        // Login successful - navigate based on role
+        navigateByRole(user);
       } else {
-        // User not found or password incorrect
+        // Login failed
         Alert.alert(
           "Login Failed",
-          "Invalid User ID/Email or password. Please check and try again or register if you're new."
+          "Invalid email/User ID or password. Please check and try again or register if you're new.",
+          [{ text: "OK", style: "default" }]
         );
       }
     } catch (error) {
-      Alert.alert("Error", "An error occurred during login. Please try again.");
       console.error("Login error:", error);
+      Alert.alert(
+        "Error",
+        error?.message || "An error occurred during login. Please try again."
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [isFormValid, formData, loading, navigateByRole]);
 
-  const handleForgotPassword = () => {
-    navigation.navigate("ForgotPassword");
-  };
+  /**
+   * Handle forgot password navigation
+   */
+  const handleForgotPassword = useCallback(() => {
+    try {
+      navigation.navigate("ForgotPassword");
+    } catch (error) {
+      console.error("Navigation error:", error);
+      Alert.alert("Navigation Error", "Could not navigate to password reset.");
+    }
+  }, [navigation]);
 
+  /**
+   * Handle sign up navigation
+   */
+  const handleSignUp = useCallback(() => {
+    try {
+      navigation.navigate("RoleSelect");
+    } catch (error) {
+      console.error("Navigation error:", error);
+      Alert.alert("Navigation Error", "Could not navigate to sign up.");
+    }
+  }, [navigation]);
+
+  // ==================== RENDER ====================
   return (
-    <SafeAreaView style={RegisterStyles.safe}>
-      {/* HEADER WITH BACK BUTTON - TOP LEFT */}
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      {/* Header with back button */}
       <View
         style={{
           flexDirection: "row",
-          paddingLeft: 16,
-          paddingVertical: 10,
-          marginTop: 20,
+          alignItems: "center",
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          marginBottom: 8,
         }}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={15} color="whitesmoke" />
+        <TouchableOpacity
+          onPress={handleBack}
+          activeOpacity={0.7}
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={24} color="whitesmoke" />
         </TouchableOpacity>
       </View>
 
@@ -104,82 +230,104 @@ export default function LoginScreen({ navigation }) {
         style={{ flex: 1 }}
       >
         <ScrollView
-          contentContainerStyle={RegisterStyles.container}
+          contentContainerStyle={{
+            paddingVertical: 20,
+            paddingHorizontal: 16,
+            flexGrow: 1,
+          }}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* TITLE */}
-          <Text style={RegisterStyles.title}>Welcome Back</Text>
-          <Text style={RegisterStyles.subtitle}>
-            Login to your account to continue
-          </Text>
+          {/* Title section */}
+          <View style={{ marginBottom: 32 }}>
+            <Text style={[styles.title, { marginBottom: 8 }]}>Welcome Back</Text>
+            <Text style={styles.subtitle}>
+              Login to your account to continue
+            </Text>
+          </View>
 
-          {/* ERROR MESSAGE */}
-          {errors.general && (
-            <View
-              style={{
-                backgroundColor: "#ff4444",
-                padding: 12,
-                borderRadius: 8,
-                marginBottom: 20,
-              }}
+          {/* Form card */}
+          <View style={[styles.card, { paddingBottom: 24 }]}>
+            {/* Email/User ID Input */}
+            <EmailInput
+              value={formData.email}
+              onChange={(value) => handleFieldChange("email", value)}
+              error={errors.email}
+              editable={!loading}
+            />
+
+            {/* Password Input */}
+            <PasswordInput
+              value={formData.password}
+              onChange={(value) => handleFieldChange("password", value)}
+              error={errors.password}
+              showPassword={showPassword}
+              onTogglePassword={() => setShowPassword(!showPassword)}
+              editable={!loading}
+            />
+
+            {/* Forgot Password Link */}
+            <TouchableOpacity
+              style={{ marginBottom: 24, alignSelf: "flex-end" }}
+              onPress={handleForgotPassword}
+              disabled={loading}
+              activeOpacity={0.7}
             >
-              <Text style={{ color: "white", fontSize: 14 }}>
-                {errors.general}
+              <Text
+                style={{
+                  color: Colors.primary,
+                  fontSize: 14,
+                  fontWeight: "600",
+                }}
+              >
+                Forgot Password?
               </Text>
-            </View>
-          )}
+            </TouchableOpacity>
 
-          {/* EMAIL INPUT */}
-          <InputField
-            label="Email or User ID"
-            icon="mail"
-            value={email}
-            onChange={setEmail}
-            onValidate={(v) => validate("email", v)}
-            error={errors.email}
-          />
+            {/* Login Button */}
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (!isFormValid() || loading) && { opacity: 0.6 },
+              ]}
+              onPress={handleLogin}
+              disabled={!isFormValid() || loading}
+              activeOpacity={0.85}
+              accessibilityLabel="Login button"
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Login</Text>
+              )}
+            </TouchableOpacity>
+          </View>
 
-          {/* PASSWORD INPUT */}
-          <PasswordInputField
-            label="Password"
-            icon="lock-closed"
-            value={password}
-            onChange={setPassword}
-            onValidate={(v) => validate("password", v)}
-            error={errors.password}
-            showPassword={showPassword}
-            onTogglePassword={() => setShowPassword(!showPassword)}
-          />
-
-          {/* FORGOT PASSWORD LINK */}
-          <TouchableOpacity 
-            style={{ marginBottom: 24 }}
-            onPress={handleForgotPassword}
+          {/* Sign Up Link */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 24,
+              gap: 4,
+            }}
           >
-            <Text style={{ color: Colors.primary, fontSize: 14, fontWeight: "600" }}>
-              Forgot Password?
+            <Text style={{ color: Colors.muted, fontSize: 14 }}>
+              Don't have an account?
             </Text>
-          </TouchableOpacity>
-
-          {/* LOGIN BUTTON */}
-          <TouchableOpacity
-            onPress={handleLogin}
-            disabled={!isFormValid || loading}
-            style={[
-              RegisterStyles.button,
-              (!isFormValid || loading) && { opacity: 0.5 },
-            ]}
-          >
-            <Text style={RegisterStyles.buttonText}>
-              {loading ? "Logging in..." : "Login"}
-            </Text>
-          </TouchableOpacity>
-
-          {/* SIGN UP LINK */}
-          <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 20 }}>
-            <Text style={{ color: Colors.muted }}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("RoleSelect")}>
-              <Text style={{ color: Colors.primary, fontWeight: "600" }}>
+            <TouchableOpacity
+              onPress={handleSignUp}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={{
+                  color: Colors.primary,
+                  fontWeight: "700",
+                  fontSize: 14,
+                }}
+              >
                 Sign Up
               </Text>
             </TouchableOpacity>
@@ -190,83 +338,149 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-/* 📝 INPUT FIELD COMPONENT */
-function InputField({ label, icon, value, onChange, onValidate, error }) {
+// ==================== INPUT COMPONENTS ====================
+
+/**
+ * Email/User ID Input Component
+ */
+function EmailInput({ value, onChange, error, editable }) {
   return (
-    <View style={{ marginBottom: 18 }}>
-      <Text style={RegisterStyles.label}>{label}</Text>
+    <View style={{ marginBottom: 20 }}>
+      <Text
+        style={{
+          color: Colors.text,
+          fontSize: 14,
+          fontWeight: "600",
+          marginBottom: 8,
+        }}
+      >
+        Email or User ID
+      </Text>
 
       <View
         style={[
-          RegisterStyles.inputBox,
-          error && { borderColor: "red", borderWidth: 1 },
+          styles.inputBox,
+          {
+            borderWidth: 1.5,
+            borderColor: error ? "#ef4444" : Colors.primary,
+            backgroundColor: "#111827",
+          },
         ]}
       >
-        <Ionicons name={icon} size={18} color={Colors.muted} />
+        <Ionicons
+          name="mail-outline"
+          size={20}
+          color={error ? "#ef4444" : Colors.primary}
+        />
         <TextInput
+          style={[
+            styles.input,
+            {
+              color: "#fff",
+            },
+          ]}
+          placeholder="Enter email or User ID"
+          placeholderTextColor="rgba(255, 255, 255, 0.5)"
           value={value}
-          onChangeText={(v) => {
-            onChange(v);
-            onValidate(v);
-          }}
-          placeholder={label}
-          placeholderTextColor={Colors.muted}
-          style={RegisterStyles.input}
+          onChangeText={onChange}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={editable}
+          selectTextOnFocus
+          accessibilityLabel="Email or User ID input"
         />
       </View>
 
-      {error ? (
-        <Text style={{ color: "red", fontSize: 12 }}>{error}</Text>
-      ) : null}
+      {error && (
+        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 8, gap: 6 }}>
+          <Ionicons name="alert-circle" size={14} color="#ef4444" />
+          <Text style={{ color: "#ef4444", fontSize: 12, flex: 1 }}>
+            {error}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
 
-/* 🔐 PASSWORD INPUT COMPONENT */
-function PasswordInputField({
-  label,
-  icon,
+/**
+ * Password Input Component with Show/Hide Toggle
+ */
+function PasswordInput({
   value,
   onChange,
-  onValidate,
   error,
   showPassword,
   onTogglePassword,
+  editable,
 }) {
   return (
-    <View style={{ marginBottom: 18 }}>
-      <Text style={RegisterStyles.label}>{label}</Text>
+    <View style={{ marginBottom: 20 }}>
+      <Text
+        style={{
+          color: Colors.text,
+          fontSize: 14,
+          fontWeight: "600",
+          marginBottom: 8,
+        }}
+      >
+        Password
+      </Text>
 
       <View
         style={[
-          RegisterStyles.inputBox,
-          error && { borderColor: "red", borderWidth: 1 },
+          styles.inputBox,
+          {
+            borderWidth: 1.5,
+            borderColor: error ? "#ef4444" : Colors.primary,
+            backgroundColor: "#111827",
+          },
         ]}
       >
-        <Ionicons name={icon} size={18} color={Colors.muted} />
-        <TextInput
-          value={value}
-          onChangeText={(v) => {
-            onChange(v);
-            onValidate(v);
-          }}
-          placeholder={label}
-          placeholderTextColor={Colors.muted}
-          secureTextEntry={!showPassword}
-          style={RegisterStyles.input}
+        <Ionicons
+          name="lock-closed-outline"
+          size={20}
+          color={error ? "#ef4444" : Colors.primary}
         />
-        <TouchableOpacity onPress={onTogglePassword}>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: "#fff",
+            },
+          ]}
+          placeholder="Enter your password"
+          placeholderTextColor="rgba(255, 255, 255, 0.5)"
+          value={value}
+          onChangeText={onChange}
+          secureTextEntry={!showPassword}
+          editable={editable}
+          selectTextOnFocus
+          accessibilityLabel="Password input"
+        />
+        <TouchableOpacity
+          onPress={onTogglePassword}
+          disabled={!editable}
+          activeOpacity={0.7}
+          accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+        >
           <Ionicons
-            name={showPassword ? "eye-off" : "eye"}
-            size={18}
-            color={Colors.muted}
+            name={showPassword ? "eye" : "eye-off"}
+            size={20}
+            color="rgba(255, 255, 255, 0.6)"
           />
         </TouchableOpacity>
       </View>
 
-      {error ? (
-        <Text style={{ color: "red", fontSize: 12 }}>{error}</Text>
-      ) : null}
+      {error && (
+        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 8, gap: 6 }}>
+          <Ionicons name="alert-circle" size={14} color="#ef4444" />
+          <Text style={{ color: "#ef4444", fontSize: 12, flex: 1 }}>
+            {error}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }

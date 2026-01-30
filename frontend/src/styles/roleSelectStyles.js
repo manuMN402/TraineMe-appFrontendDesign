@@ -17,8 +17,8 @@ export const roleSelectStyles = StyleSheet.create({
   },
 
   container: {
-    width: IS_EXTRA_LARGE_DEVICE ? 600 : Platform.OS === "web" ? 420 : "90%",
-    maxWidth: 500,
+    width: IS_EXTRA_LARGE_DEVICE ? 600 : Platform.OS === "web" ? 500 : "90%",
+    maxWidth: 600,
     paddingHorizontal: SPACING.L,
     paddingVertical: SPACING.XL,
     paddingTop: IS_SMALL_DEVICE ? SPACING.L : SPACING.XL,
@@ -66,6 +66,7 @@ export const roleSelectStyles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.primary,
     ...SHADOWS.LIGHT,
+    gap: SPACING.M,
   },
 
   iconCircle: {
@@ -90,8 +91,6 @@ export const roleSelectStyles = StyleSheet.create({
     color: Colors.muted,
     fontSize: FONT_SIZES.BODY_S,
     lineHeight: FONT_SIZES.BODY_S * 1.5,
-    flex: 1,
-    flexWrap: "wrap",
   },
 
   loginText: {

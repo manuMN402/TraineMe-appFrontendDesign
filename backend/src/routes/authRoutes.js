@@ -1,6 +1,6 @@
 import express from 'express';
-import prisma from '../config/prisma.js';
-import { hashPassword } from '../utils/auth.js';
+import { register, login, getProfile, updateProfile, getUserById, updateUserById } from '../controllers/authController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -8,49 +8,36 @@ const router = express.Router();
  * REGISTER USER
  * POST /api/auth/register
  */
-router.post('/register', async (req, res, next) => {
-  try {
-    const { firstName, lastName, email, phone, password, role = 'USER' } = req.body;
+router.post('/register', register);
 
-    // Basic validation
-    if (!firstName || !lastName || !email || !phone || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
+/**
+ * LOGIN USER
+ * POST /api/auth/login
+ */
+router.post('/login', login);
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+/**
+ * GET CURRENT USER PROFILE
+ * GET /api/auth/profile (requires authentication)
+ */
+router.get('/profile', authMiddleware, getProfile);
 
-    if (existingUser) {
-      return res.status(409).json({ error: 'Email already registered' });
-    }
+/**
+ * UPDATE USER PROFILE
+ * PUT /api/auth/profile (requires authentication)
+ */
+router.put('/profile', authMiddleware, updateProfile);
 
-    // Hash password
-    const hashedPassword = await hashPassword(password);
+/**
+ * GET USER BY ID
+ * GET /api/auth/users/:userId
+ */
+router.get('/users/:userId', getUserById);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        phone,
-        password: hashedPassword,
-        role, // USER or TRAINER
-      },
-    });
-
-    // Remove password from response
-    const { password: _, ...safeUser } = user;
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: safeUser,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+/**
+ * UPDATE USER BY ID
+ * PUT /api/auth/users/:userId (requires authentication)
+ */
+router.put('/users/:userId', authMiddleware, updateUserById);
 
 export default router;

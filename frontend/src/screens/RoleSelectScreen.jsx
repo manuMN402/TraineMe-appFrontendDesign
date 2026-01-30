@@ -46,7 +46,7 @@ export default function RoleSelectScreen({ navigation }) {
             <Ionicons name="person-outline" size={24} color={Colors.primary} />
           </View>
 
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.cardTitle}>Continue as User</Text>
             <Text style={styles.cardSub}>
               Find and book training sessions
@@ -72,7 +72,7 @@ export default function RoleSelectScreen({ navigation }) {
             <Ionicons name="people" size={24} color={Colors.primary} />
           </View>
 
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.cardTitle}>Continue as Trainer</Text>
             <Text style={styles.cardSub}>
               Share your skills and earn
